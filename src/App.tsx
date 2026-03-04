@@ -12,7 +12,8 @@ import {
   Menu, 
   Bell, 
   Search, 
-  MoreHorizontal, 
+  MoreHorizontal,
+  MoreVertical,
   MessageCircle, 
   Share2, 
   Heart,
@@ -27,10 +28,14 @@ import {
   LayoutDashboard,
   Settings,
   ShieldCheck,
+  TrendingUp,
   LogOut,
   ExternalLink,
   CheckCircle2,
   Clock,
+  Copy,
+  UserCheck,
+  UserX,
   Pause,
   Trash2,
   CreditCard,
@@ -50,7 +55,17 @@ import {
   MapPin,
   X,
   Camera,
-  Eye
+  Eye,
+  MessageSquare,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Linkedin,
+  GripVertical,
+  Info,
+  FileText,
+  AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -61,6 +76,215 @@ import { User, Ad, AdminStats } from './types';
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// --- Burst Effect Components ---
+
+const EmojiBurst: React.FC<{ x: number; y: number; onComplete: () => void }> = ({ x, y, onComplete }) => {
+  const emojis = ["❤️", "❤️", "🥀", "🥀", "😘", "😘", "😍", "😍", "🥰", "🥰", "💞", "💞", "💕", "💕", "💓", "💓", "❤️", "🔥", "❤️", "🔥", "❤️", "🔥", "💗", "💗"];
+  const particles = Array.from({ length: 12 });
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[9999]">
+      <motion.div
+        initial={{ opacity: 0, y: y, x: x - 50, scale: 0.5 }}
+        animate={{ opacity: 1, y: y - 100, scale: 1.5 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="absolute w-32 text-center"
+      >
+        <span className="text-sm font-bold text-blue-600 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full shadow-sm border border-blue-100">
+          Thanks Thanks
+        </span>
+      </motion.div>
+      {particles.map((_, i) => {
+        const angle = (i / particles.length) * Math.PI * 2;
+        const velocity = 100 + Math.random() * 150;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        return (
+          <motion.div
+            key={i}
+            initial={{ x, y, opacity: 1, scale: 0 }}
+            animate={{ 
+              x: x + tx, 
+              y: y + ty, 
+              opacity: [1, 1, 0], // Stay visible then fade
+              scale: [0, 1.8, 2],
+              rotate: Math.random() * 720 
+            }}
+            transition={{ 
+              duration: 3, // 3 seconds as requested
+              times: [0, 0.8, 1], // Stays visible for 80% of the time
+              ease: "linear" // Slow motion feel
+            }}
+            onAnimationComplete={i === 0 ? onComplete : undefined}
+            className="absolute text-2xl"
+          >
+            {emoji}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
+
+const SocialLinksModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const links = [
+    { name: 'Facebook', icon: '📘', url: 'https://facebook.com', color: 'bg-blue-600' },
+    { name: 'Instagram', icon: '📸', url: 'https://instagram.com', color: 'bg-pink-600' },
+    { name: 'Twitter', icon: '🐦', url: 'https://twitter.com', color: 'bg-sky-500' },
+    { name: 'WhatsApp', icon: '💬', url: 'https://whatsapp.com', color: 'bg-emerald-500' },
+    { name: 'YouTube', icon: '📺', url: 'https://youtube.com', color: 'bg-red-600' },
+    { name: 'LinkedIn', icon: '💼', url: 'https://linkedin.com', color: 'bg-blue-700' },
+  ];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
+          >
+            <div className="p-6 text-center border-b border-slate-100">
+              <h3 className="text-xl font-display font-bold text-slate-900">Social Connect</h3>
+              <p className="text-sm text-slate-500">Find me on other platforms</p>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-4">
+              {links.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group"
+                >
+                  <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform", link.color)}>
+                    {link.icon}
+                  </div>
+                  <span className="text-xs font-bold text-slate-700">{link.name}</span>
+                </a>
+              ))}
+            </div>
+            <button
+              onClick={onClose}
+              className="w-full py-4 bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors"
+            >
+              Close
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const SocialMediaInteractiveIcon = ({ onOpenSocial }: { onOpenSocial: () => void }) => {
+  const [showThanks, setShowThanks] = useState(false);
+  const [emoji, setEmoji] = useState("❤️");
+  const emojis = ["❤️", "❤️", "🥀", "🥀", "😘", "😘", "😍", "😍", "🥰", "🥰", "💞", "💞", "💕", "💕", "💓", "💓", "❤️", "🔥", "❤️", "🔥", "❤️", "🔥", "💗", "💗"];
+
+  const trigger = (x?: number, y?: number) => {
+    setEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+    setShowThanks(true);
+    
+    if (x !== undefined && y !== undefined) {
+      const event = new CustomEvent('trigger-burst', { 
+        detail: { x, y } 
+      });
+      window.dispatchEvent(event);
+    }
+  };
+
+  useEffect(() => {
+    if (showThanks) {
+      const timer = setTimeout(() => setShowThanks(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showThanks]);
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <AnimatePresence>
+        {showThanks && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.5 }}
+            animate={{ opacity: 1, y: -65, scale: 1 }}
+            exit={{ opacity: 0, y: -90, scale: 0.8 }}
+            transition={{ type: "spring", damping: 12 }}
+            className="absolute z-20 flex flex-col items-center pointer-events-none"
+          >
+            <motion.span 
+              animate={{ y: [0, -5, 0] }} 
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="text-3xl mb-1"
+            >
+              {emoji}
+            </motion.span>
+            <span className="text-[10px] font-bold text-white bg-[#c29a5b] px-3 py-1 rounded-full shadow-md border border-white/30 whitespace-nowrap uppercase tracking-tighter">
+              Thanks Thanks
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.button
+        drag
+        dragConstraints={{ left: -50, right: 50, top: -50, bottom: 50 }}
+        onDrag={(e: any, info) => {
+          trigger(info.point.x, info.point.y);
+        }}
+        onClick={() => {
+          trigger();
+          onOpenSocial();
+        }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="w-12 h-12 bg-[#c29a5b] rounded-full flex flex-col items-center justify-center text-white shadow-lg border-2 border-white/30 z-10 cursor-grab active:cursor-grabbing"
+      >
+      </motion.button>
+    </div>
+  );
+};
+
+const BurstContainer = () => {
+  const [bursts, setBursts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const counterRef = useRef(0);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      setBursts(prev => [...prev, { id: counterRef.current++, x: e.detail.x, y: e.detail.y }]);
+    };
+    window.addEventListener('trigger-burst', handler);
+    return () => window.removeEventListener('trigger-burst', handler);
+  }, []);
+
+  return (
+    <>
+      <AnimatePresence>
+        {bursts.map(burst => (
+          <EmojiBurst 
+            key={burst.id} 
+            x={burst.x} 
+            y={burst.y} 
+            onComplete={() => setBursts(prev => prev.filter(b => b.id !== burst.id))} 
+          />
+        ))}
+      </AnimatePresence>
+    </>
+  );
+};
 
 // --- Components ---
 
@@ -382,7 +606,7 @@ const CreatePostPage = ({ user, onPostCreated }: { user: User | null, onPostCrea
     if (!content.trim() && !image) return;
     
     const newPost: Ad = {
-      id: Date.now(),
+      id: Math.floor(Date.now() + Math.random() * 1000000),
       user_id: user?.id || 0,
       campaign_name: "User Post",
       budget_type: "daily",
@@ -959,10 +1183,18 @@ const SecurityPrivacyPage = () => {
 const HelpSupportPage = () => {
   const navigate = useNavigate();
   const [ticket, setTicket] = useState({ subject: '', message: '' });
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  const faqs = [
+    { q: "How do I earn GNG Points?", a: "You can earn points by creating posts, engaging with other users' content, and completing daily tasks in the dashboard." },
+    { q: "How to withdraw PKR?", a: "Go to your GNG Point Dashboard, click Withdraw, and select your preferred method (JazzCash/EasyPaisa)." },
+    { q: "What is the MLM Agent Plan?", a: "It's a referral-based earning system where you earn commissions from your team's activities." },
+    { q: "Is my data secure?", a: "Yes, we use industry-standard encryption to protect your personal information and transaction data." }
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Support ticket submitted! We will get back to you soon.');
+    alert('Support ticket submitted successfully! We will get back to you soon.');
     setTicket({ subject: '', message: '' });
   };
 
@@ -975,67 +1207,359 @@ const HelpSupportPage = () => {
         <h2 className="text-2xl font-display font-bold">Help & Support</h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <button className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform">
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-            <MessageCircle size={24} />
-          </div>
-          <span className="font-bold text-slate-900">Live Chat</span>
-        </button>
-        <button className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center gap-3 hover:scale-[1.02] transition-transform">
-          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
-            <Mail size={24} />
-          </div>
-          <span className="font-bold text-slate-900">Email Us</span>
-        </button>
-      </div>
-
-      <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <h3 className="text-lg font-bold text-slate-900">Submit a Support Ticket</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Subject</label>
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100">
+          <h3 className="font-bold text-slate-900">Submit a Support Ticket</h3>
+          <p className="text-xs text-slate-500 mt-1">Our team usually responds within 24 hours.</p>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Subject</label>
             <input 
               type="text" 
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 outline-none transition-all"
-              placeholder="What do you need help with?"
+              placeholder="e.g., Withdrawal Issue"
               value={ticket.subject}
               onChange={(e) => setTicket({...ticket, subject: e.target.value})}
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Message</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
             <textarea 
               required
               className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-600 outline-none transition-all h-32 resize-none"
-              placeholder="Describe your issue in detail..."
+              placeholder="Describe your problem in detail..."
               value={ticket.message}
               onChange={(e) => setTicket({...ticket, message: e.target.value})}
             />
           </div>
-          <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-            Submit Ticket
+          <button 
+            type="submit"
+            className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+          >
+            Send Message
           </button>
         </form>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
-        <div className="p-6 bg-slate-50/50">
-          <h3 className="font-bold text-slate-900">Frequently Asked Questions</h3>
+      <div className="space-y-4">
+        <h3 className="font-bold text-slate-900 px-2">Frequently Asked Questions</h3>
+        <div className="space-y-2">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <button 
+                onClick={() => setExpandedFaq(expandedFaq === i ? null : i)}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+              >
+                <span className="font-bold text-slate-700 text-sm">{faq.q}</span>
+                <ChevronRight size={18} className={cn("text-slate-400 transition-transform", expandedFaq === i && "rotate-90")} />
+              </button>
+              <AnimatePresence>
+                {expandedFaq === i && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="px-4 pb-4 text-sm text-slate-500 leading-relaxed border-t border-slate-50 pt-3"
+                  >
+                    {faq.a}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
         </div>
-        {[
-          { q: 'How do I earn GNG Points?', a: 'You can earn points by watching ads, inviting friends, and participating in community activities.' },
-          { q: 'How to withdraw my earnings?', a: 'Go to GNG Point dashboard and click Withdraw. You can use JazzCash, EasyPaisa or Bank Transfer.' },
-          { q: 'What is the MLM Plan?', a: 'The MLM plan allows you to build a team and earn commissions from their activities.' },
-        ].map((faq, i) => (
-          <div key={i} className="p-6 space-y-2">
-            <p className="font-bold text-slate-900 text-sm">{faq.q}</p>
-            <p className="text-xs text-slate-500 leading-relaxed">{faq.a}</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
+          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mx-auto">
+            <MessageCircle size={24} />
           </div>
-        ))}
+          <h4 className="font-bold text-slate-900">Live Chat</h4>
+          <p className="text-[10px] text-slate-500">Available 9AM - 9PM</p>
+        </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center space-y-2">
+          <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto">
+            <Mail size={24} />
+          </div>
+          <h4 className="font-bold text-slate-900">Email Support</h4>
+          <p className="text-[10px] text-slate-500">support@gngsocial.com</p>
+        </div>
       </div>
     </div>
+  );
+};
+
+const SystemNoticePage = () => {
+  const navigate = useNavigate();
+  
+  const notices = [
+    {
+      title: "System Status & Updates",
+      icon: Zap,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      content: "All systems are currently operational. We have recently upgraded our servers to handle more traffic and ensure faster point processing."
+    },
+    {
+      title: "Point Conversion Policy",
+      icon: Bitcoin,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      content: "Current conversion rate: 1 GNG Point = 0.5 PKR. This rate is subject to change based on market conditions and platform growth."
+    },
+    {
+      title: "Withdrawal Guidelines",
+      icon: Clock,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      content: "Withdrawal requests are processed within 24 to 48 hours. Please ensure your JazzCash/EasyPaisa details are correct to avoid delays."
+    },
+    {
+      title: "Content & Islamic Policy",
+      icon: ShieldCheck,
+      color: "text-red-600",
+      bg: "bg-red-50",
+      content: "GNG Social strictly follows an Islamic and ethical content policy. Any post containing nudity, music, or unethical content will lead to an immediate permanent ban."
+    },
+    {
+      title: "Referral Program",
+      icon: UserPlus,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+      content: "Earn 100 GNG Points for every verified friend you invite. Your friend must complete their profile for you to receive the reward."
+    }
+  ];
+
+  return (
+    <div className="pt-24 pb-20 px-4 max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+          <ArrowLeft size={24} className="text-slate-600" />
+        </button>
+        <h2 className="text-2xl font-display font-bold">System Notices</h2>
+      </div>
+
+      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+        <div className="relative z-10 flex items-center gap-6">
+          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shrink-0">
+            <Info size={32} />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold">Official Announcements</h3>
+            <p className="text-blue-100 text-sm mt-1">Stay updated with the latest GNG Social system rules and news.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {notices.map((notice, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3"
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", notice.bg, notice.color)}>
+                <notice.icon size={20} />
+              </div>
+              <h4 className="font-bold text-slate-900">{notice.title}</h4>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed pl-13">
+              {notice.content}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="bg-slate-900 rounded-3xl p-8 text-center space-y-4">
+        <AlertTriangle className="text-amber-400 mx-auto" size={40} />
+        <h3 className="text-white font-bold text-lg">Important Reminder</h3>
+        <p className="text-slate-400 text-sm">
+          GNG Social is a professional platform. Misuse of the points system or attempting to cheat will result in account termination without notice.
+        </p>
+        <button 
+          onClick={() => navigate('/support')}
+          className="inline-flex items-center gap-2 text-blue-400 font-bold hover:underline"
+        >
+          Contact Support if you have questions
+          <ArrowRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const DraggableFloatingMenu = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
+  const [emoji, setEmoji] = useState("❤️");
+  const constraintsRef = useRef(null);
+  const emojis = ["❤️", "🥀", "😘", "😍", "🥰", "💞", "💕", "💓", "🔥", "💗"];
+
+  const trigger = (x?: number, y?: number) => {
+    setEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+    setShowThanks(true);
+    
+    if (x !== undefined && y !== undefined) {
+      const event = new CustomEvent('trigger-burst', { 
+        detail: { x, y } 
+      });
+      window.dispatchEvent(event);
+    }
+  };
+
+  useEffect(() => {
+    if (showThanks) {
+      const timer = setTimeout(() => setShowThanks(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showThanks]);
+
+  const socialLinks = [
+    { icon: Facebook, label: 'Facebook', color: 'bg-[#1877F2]', url: 'https://facebook.com' },
+    { icon: Twitter, label: 'Twitter', color: 'bg-[#1DA1F2]', url: 'https://twitter.com' },
+    { icon: Instagram, label: 'Instagram', color: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]', url: 'https://instagram.com' },
+    { icon: Youtube, label: 'YouTube', color: 'bg-[#FF0000]', url: 'https://youtube.com' },
+    { icon: Linkedin, label: 'LinkedIn', color: 'bg-[#0A66C2]', url: 'https://linkedin.com' },
+    { icon: Send, label: 'Telegram', color: 'bg-[#0088cc]', url: 'https://t.me' },
+  ];
+
+  const systemNotices = [
+    { title: 'Islamic Policy', content: 'No music, no nudity, no unethical content allowed.', icon: ShieldCheck, color: 'text-emerald-600' },
+    { title: 'Points Rate', content: '1 GNG Point = 0.5 PKR. Rates may vary.', icon: Bitcoin, color: 'text-amber-600' },
+    { title: 'Withdrawals', content: 'Processed within 24-48 hours via JazzCash/EasyPaisa.', icon: Clock, color: 'text-blue-600' },
+  ];
+
+  return (
+    <>
+      {/* Draggable Handle */}
+      <div className="fixed inset-0 pointer-events-none z-[60]" ref={constraintsRef}>
+        <motion.div
+          drag
+          dragConstraints={constraintsRef}
+          dragElastic={0.1}
+          whileDrag={{ scale: 1.1 }}
+          onDrag={(e, info) => {
+            // Trigger burst occasionally during drag
+            if (Math.random() > 0.85) {
+              trigger(info.point.x, info.point.y);
+            }
+          }}
+          className="pointer-events-auto w-16 h-16 bg-[#C5A059] rounded-full shadow-2xl flex items-center justify-center cursor-grab active:cursor-grabbing border-4 border-white shadow-amber-200/50 relative"
+          style={{ position: 'absolute', right: 20, bottom: 120 }}
+          onClick={(e) => {
+            trigger(e.clientX, e.clientY);
+            setIsOpen(true);
+          }}
+        >
+          <AnimatePresence>
+            {showThanks && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.5 }}
+                animate={{ opacity: 1, y: -75, scale: 1 }}
+                exit={{ opacity: 0, y: -100, scale: 0.8 }}
+                transition={{ type: "spring", damping: 12 }}
+                className="absolute z-20 flex flex-col items-center pointer-events-none"
+              >
+                <motion.span 
+                  animate={{ y: [0, -5, 0] }} 
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="text-3xl mb-1"
+                >
+                  {emoji}
+                </motion.span>
+                <span className="text-[10px] font-bold text-white bg-[#c29a5b] px-3 py-1 rounded-full shadow-md border border-white/30 whitespace-nowrap uppercase tracking-tighter">
+                  Thanks Thanks
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+
+      {/* Bottom Notice/Social Sheet */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[80] shadow-2xl border-t border-slate-100 max-h-[85vh] overflow-y-auto"
+            >
+              <div className="p-8 space-y-8">
+                <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto" />
+                
+                <div className="text-center space-y-2">
+                  <h3 className="text-2xl font-display font-bold text-slate-900">GNG Official Notice</h3>
+                  <p className="text-slate-500 text-sm">Important updates and community links</p>
+                </div>
+
+                {/* System Notices */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">System Rules</h4>
+                  <div className="grid gap-3">
+                    {systemNotices.map((notice, i) => (
+                      <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex gap-4">
+                        <div className={cn("w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm", notice.color)}>
+                          <notice.icon size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{notice.title}</p>
+                          <p className="text-xs text-slate-500 leading-relaxed">{notice.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Social Media Links */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">Social Media</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {socialLinks.map((link, i) => (
+                      <a 
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-2 p-3 bg-white rounded-2xl border border-slate-100 hover:border-blue-200 transition-all group shadow-sm"
+                      >
+                        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform", link.color)}>
+                          <link.icon size={24} />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-600">{link.label}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="w-full py-4 bg-[#C5A059] text-white rounded-2xl font-bold shadow-lg shadow-amber-200 hover:opacity-90 transition-opacity"
+                >
+                  Got it, Thanks!
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
@@ -1113,6 +1637,30 @@ const SearchPage = () => {
 };
 
 const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { icon: UserIcon, label: 'My Profile', path: '/account' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Users, label: 'Invite Friends', path: '/invite' },
+    { icon: ArrowUpRight, label: 'Withdraw Points', path: '/withdraw' },
+    { icon: LayoutDashboard, label: 'Ads Manager', path: '/ads' },
+    { icon: ShieldCheck, label: 'Privacy Policy', path: '/privacy' },
+    { icon: LogOut, label: 'Logout', path: '/login', color: 'text-red-600' },
+  ];
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="bg-blue-600 text-white py-1 overflow-hidden">
@@ -1120,7 +1668,7 @@ const Header = () => {
           GNG Social Media • Boost Your Presence • Earn GNG Points • Professional Advertising Dashboard • Join the Community Now!
         </div>
       </div>
-      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto relative">
         <div className="flex items-center gap-3 overflow-hidden flex-1 mr-4">
           <Link to="/" className="w-14 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg font-display shrink-0 shadow-sm">
             GNG
@@ -1131,23 +1679,47 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4 shrink-0">
-          <Link 
-            to="/search" 
-            className="hidden md:flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full text-slate-500 hover:bg-slate-200 transition-colors w-64"
+        <div className="flex items-center gap-4 shrink-0" ref={menuRef}>
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={cn(
+              "p-2 rounded-full transition-all duration-200",
+              isMenuOpen ? "bg-blue-50 text-blue-600" : "hover:bg-slate-100 text-slate-600"
+            )}
           >
-            <Search size={18} />
-            <span className="text-sm">Search...</span>
-          </Link>
-          <Link to="/search" className="md:hidden p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <Search size={20} className="text-slate-600" />
-          </Link>
-          <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <Bell size={20} className="text-slate-600" />
+            <MoreVertical size={24} />
           </button>
-          <button className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <Menu size={24} className="text-slate-600" />
-          </button>
+
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-full right-4 mt-2 w-64 bg-white rounded-3xl border border-slate-100 shadow-2xl shadow-slate-200/60 overflow-hidden py-2 z-[60]"
+              >
+                <div className="px-4 py-3 border-b border-slate-50 mb-1">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Menu Options</p>
+                </div>
+                {menuItems.map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      navigate(item.path);
+                      setIsMenuOpen(false);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors text-left",
+                      item.color || "text-slate-700"
+                    )}
+                  >
+                    <item.icon size={18} className={cn(!item.color && "text-slate-400")} />
+                    <span className="text-sm font-bold">{item.label}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>
@@ -1463,7 +2035,167 @@ const PostCard: React.FC<PostCardProps> = ({ ad }) => {
 
 // --- Pages ---
 
+const MultiStepNoticeModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
+  const [step, setStep] = useState(1);
+  
+  if (!isOpen) return null;
+
+  const steps = [
+    {
+      title: "GNG TEAM WELCOME",
+      content: (
+        <div className="text-center space-y-4">
+          <p className="font-bold text-slate-800">GNG TEAM WELCOME TO EVERYONE</p>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-center gap-2">
+              <Star className="text-amber-500" size={18} />
+              <span>Branded & Trusted Platform</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <Smartphone className="text-blue-500" size={18} />
+              <span>24/7 Customer Care</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <Zap className="text-emerald-500" size={18} />
+              <span>Daily Gift Codes & Promotions</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-blue-600 font-bold">
+              <Globe size={18} />
+              <span>Join with us in:</span>
+            </div>
+          </div>
+          <div className="text-[10px] text-blue-500 font-medium grid grid-cols-2 gap-1">
+            <span>gngsocial.com</span>
+            <span>gngrewards.com</span>
+            <span>gngpkr.com</span>
+            <span>gnggo.com</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "COMMUNITY LINKS",
+      content: (
+        <div className="text-center space-y-4">
+          <p className="font-bold text-slate-800">OFFICIAL CHANNELS</p>
+          <div className="grid grid-cols-2 gap-3">
+            <a href="#" className="p-3 bg-blue-50 rounded-xl flex flex-col items-center gap-1">
+              <Facebook className="text-[#1877F2]" size={24} />
+              <span className="text-[10px] font-bold">Facebook</span>
+            </a>
+            <a href="#" className="p-3 bg-pink-50 rounded-xl flex flex-col items-center gap-1">
+              <Instagram className="text-[#E4405F]" size={24} />
+              <span className="text-[10px] font-bold">Instagram</span>
+            </a>
+            <a href="#" className="p-3 bg-red-50 rounded-xl flex flex-col items-center gap-1">
+              <Youtube className="text-[#FF0000]" size={24} />
+              <span className="text-[10px] font-bold">YouTube</span>
+            </a>
+            <a href="#" className="p-3 bg-sky-50 rounded-xl flex flex-col items-center gap-1">
+              <Twitter className="text-[#1DA1F2]" size={24} />
+              <span className="text-[10px] font-bold">Twitter</span>
+            </a>
+          </div>
+          <p className="text-xs text-slate-500">Follow us for daily gift codes and updates!</p>
+        </div>
+      )
+    },
+    {
+      title: "SYSTEM RULES",
+      content: (
+        <div className="text-center space-y-4">
+          <p className="font-bold text-slate-800">IMPORTANT GUIDELINES</p>
+          <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 text-left space-y-3">
+            <div className="flex gap-2">
+              <ShieldCheck className="text-amber-600 shrink-0" size={16} />
+              <p className="text-[11px] text-amber-900 font-medium">Islamic Policy: No music, no nudity, no unethical content allowed.</p>
+            </div>
+            <div className="flex gap-2">
+              <Bitcoin className="text-amber-600 shrink-0" size={16} />
+              <p className="text-[11px] text-amber-900 font-medium">Conversion: 1 GNG Point = 0.5 PKR. Rates may vary.</p>
+            </div>
+            <div className="flex gap-2">
+              <Clock className="text-amber-600 shrink-0" size={16} />
+              <p className="text-[11px] text-amber-900 font-medium">Withdrawals: Processed within 24-48 hours via JazzCash/EasyPaisa.</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-400 italic">By clicking confirm, you agree to our terms of service.</p>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        className="relative w-full max-w-sm bg-white rounded-[32px] overflow-hidden shadow-2xl"
+      >
+        <div className="bg-[#C5A059] p-4 text-center">
+          <h3 className="text-white font-display font-bold tracking-widest">{steps[step-1].title}</h3>
+        </div>
+        
+        <div className="p-8">
+          {steps[step-1].content}
+        </div>
+
+        <div className="p-6 pt-0 flex gap-3">
+          {step > 1 && (
+            <button 
+              onClick={() => setStep(step - 1)}
+              className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors"
+            >
+              Back
+            </button>
+          )}
+          {step < 3 ? (
+            <button 
+              onClick={() => setStep(step + 1)}
+              className="flex-1 py-3 bg-[#C5A059] text-white rounded-xl font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-amber-200"
+            >
+              Next
+            </button>
+          ) : (
+            <button 
+              onClick={onClose}
+              className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+            >
+              Confirm
+            </button>
+          )}
+        </div>
+
+        <div className="pb-6 flex justify-center gap-1.5">
+          {[1, 2, 3].map((i) => (
+            <div 
+              key={i} 
+              className={cn(
+                "w-1.5 h-1.5 rounded-full transition-all",
+                step === i ? "bg-[#C5A059] w-4" : "bg-slate-200"
+              )} 
+            />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 const HomePage = ({ user, ads, userPosts }: { user: User | null, ads: Ad[], userPosts: Ad[] }) => {
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  useEffect(() => {
+    // Show modal on every load/refresh of home page as requested
+    setShowWelcomeModal(true);
+  }, []);
+
   const regularPosts = [
     {
       id: 1001,
@@ -1510,51 +2242,58 @@ const HomePage = ({ user, ads, userPosts }: { user: User | null, ads: Ad[], user
 
   return (
     <div className="space-y-6 pb-20 pt-24 px-4 max-w-7xl mx-auto">
-      {/* Search Bar */}
-      <div className="max-w-2xl mx-auto w-full">
-        <Link 
-          to="/search"
-          className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:border-blue-300 transition-all group"
-        >
-          <Search size={20} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
-          <span className="text-slate-400 text-sm font-medium">Search GNG Social...</span>
-        </Link>
-      </div>
-
+      <MultiStepNoticeModal isOpen={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
+      
       <HeroSlider />
 
       <div className="space-y-3 max-w-2xl mx-auto w-full">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
-              <Wallet size={24} />
+        <div className="grid grid-cols-2 gap-4 w-full">
+          {/* GNG Points Card with Highlight Effect */}
+          <motion.div 
+            initial={{ scale: 1 }}
+            animate={{ 
+              boxShadow: ["0px 0px 0px rgba(59, 130, 246, 0)", "0px 0px 20px rgba(59, 130, 246, 0.4)", "0px 0px 0px rgba(59, 130, 246, 0)"]
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="bg-white p-5 rounded-3xl border-2 border-blue-100 shadow-sm space-y-2 relative overflow-hidden group"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GNG Points</p>
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-tight">GNG Points</p>
-              <p className="text-2xl font-display font-bold text-slate-900 leading-none mt-1">{user?.points || 0}</p>
+            <div className="flex flex-col">
+              <motion.p 
+                key={user?.points}
+                initial={{ scale: 1.2, color: "#2563eb" }}
+                animate={{ scale: 1, color: "#0f172a" }}
+                className="text-3xl font-display font-black text-slate-900 leading-none"
+              >
+                {user?.points || 500}
+              </motion.p>
+              <p className="text-[10px] font-bold text-emerald-600 mt-1">Rs {(user?.points || 500) * 0.5}</p>
             </div>
-          </div>
-          <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-            <p className="text-xs font-medium text-emerald-600">Available to withdraw</p>
-            <Link to="/points" className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline">
-              View Details <ArrowUpRight size={14} />
-            </Link>
-          </div>
-        </div>
-        
-        <div className="bg-blue-600 p-4 rounded-xl shadow-lg flex items-center justify-between text-white relative overflow-hidden">
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-1">
-              <Users size={18} className="text-blue-200" />
-              <p className="text-xs font-bold uppercase tracking-tight text-blue-100">Invite Friends</p>
+            <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-blue-50 rounded-full blur-2xl group-hover:bg-blue-100 transition-colors" />
+          </motion.div>
+
+          {/* Invite Friends Card */}
+          <Link 
+            to="/invite"
+            className="bg-blue-600 p-5 rounded-3xl shadow-lg shadow-blue-200/50 flex flex-col justify-between text-white relative overflow-hidden group transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <div className="relative z-10 space-y-2">
+              <div className="flex items-center gap-2">
+                <Users size={16} className="text-blue-100" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-blue-100">Invite Friends</p>
+              </div>
+              <p className="text-xl font-display font-bold leading-tight">Get 100<br/>Points</p>
             </div>
-            <p className="text-lg font-bold leading-tight">Get 100 Extra Points</p>
-            <p className="text-[10px] text-blue-100 mt-1">For every friend who joins GNG</p>
-          </div>
-          <Link to="/invite" className="relative z-10 bg-white text-blue-600 px-6 py-2 rounded-xl font-bold hover:bg-slate-100 transition-colors shadow-lg">
-            Invite Now
+            <div className="relative z-10 mt-4">
+              <div className="inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                Invite Now <ArrowRight size={12} />
+              </div>
+            </div>
+            <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
           </Link>
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
         </div>
       </div>
       
@@ -1813,37 +2552,32 @@ const PointsDashboard = ({ user }: { user: User | null }) => {
       </div>
       
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-3 text-white shadow-lg relative overflow-hidden flex flex-col justify-center min-h-[100px]">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl" />
-          <p className="text-white/70 text-[9px] font-bold uppercase tracking-wider mb-0.5">Total GNG Points</p>
-          <h3 className="text-xl font-display font-bold">{user?.points.toLocaleString()}</h3>
-          <div className="flex items-center gap-1 text-emerald-400 text-[9px] font-bold mt-0.5">
-            <ArrowUpRight size={8} />
-            <span>+12.5%</span>
+        {/* Combined Points & PKR Card */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden flex flex-col justify-center min-h-[120px]">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl" />
+          <div className="space-y-3 relative z-10">
+            <div>
+              <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest mb-1">GNG Points</p>
+              <h3 className="text-2xl font-display font-bold leading-none">{user?.points.toLocaleString()}</h3>
+            </div>
+            <div className="pt-2 border-t border-white/10">
+              <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest mb-1">PKR Value</p>
+              <h3 className="text-lg font-display font-bold leading-none text-emerald-300">Rs. {pkrValue.toLocaleString()}</h3>
+            </div>
           </div>
         </div>
         
-        <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col justify-center min-h-[100px] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-50 rounded-full -mr-10 -mt-10 blur-2xl opacity-50" />
-          <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wider mb-0.5">PKR Value</p>
-          <div className="flex items-baseline gap-1">
-            <h3 className="text-xl font-display font-bold text-slate-900">Rs. {pkrValue.toLocaleString()}</h3>
+        {/* Available Balance Card */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col justify-center min-h-[120px] relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full -mr-12 -mt-12 blur-2xl opacity-50 group-hover:bg-blue-100 transition-colors" />
+          <div className="space-y-2 relative z-10">
+            <div>
+              <p className="text-slate-500 text-[9px] font-bold uppercase tracking-widest mb-1">Available Balance</p>
+              <h3 className="text-2xl font-display font-bold text-slate-900 leading-none">Rs 500</h3>
+            </div>
+            <p className="text-[9px] text-slate-400 font-medium leading-tight">Believe under text use for ads running</p>
           </div>
-          <p className="text-slate-400 text-[8px] mt-0.5">1 Pt = Rs. {pkrRate}</p>
         </div>
-      </div>
-      
-      <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col justify-center min-h-[200px] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-50" />
-        <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Ad Credit Balance</p>
-        <h3 className="text-2xl font-display font-bold text-slate-900 leading-tight">
-          PKR Rs Available Balance<br/>
-          <span className="text-blue-600">for use ads running</span>
-        </h3>
-        <p className="text-slate-400 text-xs mt-4 flex items-center gap-2">
-          <Zap size={14} className="text-amber-500" />
-          Boost your posts instantly
-        </p>
       </div>
       
       <div className="grid grid-cols-2 gap-4">
@@ -1908,6 +2642,206 @@ const PointsDashboard = ({ user }: { user: User | null }) => {
             <Bitcoin size={16} className="text-amber-400" />
             <span className="text-xs font-bold">Crypto Currency</span>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InviteFriendsPage = ({ user }: { user: User | null }) => {
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+  const referralLink = `https://gngsocial.com/register?ref=${user?.referral_code || 'GNG123'}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Join GNG Social Media',
+        text: 'Join GNG Social Media and earn points!',
+        url: referralLink,
+      });
+    } else {
+      handleCopy();
+    }
+  };
+
+  const history = [
+    { name: 'Ahmad Khan', status: 'verified', points: 100, date: '2 hours ago' },
+    { name: 'Sara Malik', status: 'pending', points: 100, date: '1 day ago' },
+    { name: 'John Doe', status: 'expired', points: 0, date: '4 days ago' },
+    { name: 'Zainab Bibi', status: 'verified', points: 100, date: '5 days ago' },
+    { name: 'Ali Raza', status: 'pending', points: 100, date: '2 days ago' },
+  ];
+
+  return (
+    <div className="pt-24 pb-20 px-4 max-w-7xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+          <ArrowLeft size={24} />
+        </button>
+        <h2 className="text-2xl font-display font-bold text-slate-900">Invite Friends</h2>
+      </div>
+
+      {/* SECTION 1: Active Account Card */}
+      <div className="flex justify-center">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 text-center max-w-xs w-full relative overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-blue-600" />
+          <h3 className="text-sm font-bold text-slate-900 mb-1">Your Active Account</h3>
+          <p className="text-2xl font-display font-black text-blue-600">600</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">All Your Invite Friends</p>
+        </div>
+      </div>
+
+      {/* SECTION 2: Invite Statistics */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left Card */}
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/40 relative overflow-hidden">
+          <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4">
+            <UserCheck size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Verified Invite</p>
+          <h4 className="text-3xl font-display font-bold text-slate-900 mb-2">400</h4>
+          <div className="pt-3 border-t border-slate-50">
+            <p className="text-[10px] font-bold text-emerald-600">Total Earn GNG Point: 5000</p>
+          </div>
+        </div>
+
+        {/* Right Card */}
+        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/40 relative overflow-hidden">
+          <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-4">
+            <Clock size={20} />
+          </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Unverified Invite</p>
+          <h4 className="text-3xl font-display font-bold text-slate-900 mb-2">100</h4>
+          <div className="pt-3 border-t border-slate-50">
+            <p className="text-[10px] font-bold text-amber-600">Pending GNG Point: 500</p>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 3: Info Text Box */}
+      <div className="bg-blue-600 rounded-3xl p-6 text-white shadow-lg shadow-blue-200 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+        <div className="flex gap-4 relative z-10">
+          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-md">
+            <Info size={24} />
+          </div>
+          <div className="space-y-1">
+            <p className="font-bold text-lg">Apna account activate karo.</p>
+            <p className="text-sm text-blue-50 leading-relaxed">
+              Jab aapka invited user Point withdraw karega ya Exchange karega, 
+              aapko <span className="font-bold text-white">5% – 10% commission</span> milega.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 4: Referral Link Card */}
+      <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-2xl shadow-slate-200/60 space-y-6">
+        <div className="space-y-2">
+          <h3 className="text-xl font-display font-bold text-slate-900">Your Referral Link</h3>
+          <p className="text-sm text-slate-500">Share this link with your friends to earn rewards together.</p>
+        </div>
+        
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <input 
+              type="text" 
+              readOnly 
+              value={referralLink}
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-medium text-slate-600 outline-none focus:ring-2 focus:ring-blue-600 transition-all"
+            />
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={handleCopy}
+              className={cn(
+                "flex-1 md:flex-none px-8 py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg",
+                copied ? "bg-emerald-600 text-white shadow-emerald-200" : "bg-slate-900 text-white shadow-slate-200 hover:bg-slate-800"
+              )}
+            >
+              {copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button 
+              onClick={handleShare}
+              className="flex-1 md:flex-none px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            >
+              <Share2 size={18} />
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 5: Invite History Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-xl font-display font-bold text-slate-900">Invite History</h3>
+          <button className="text-xs font-bold text-blue-600">View All</button>
+        </div>
+
+        <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
+          <div className="divide-y divide-slate-50">
+            {history.map((item, i) => (
+              <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0",
+                    item.status === 'verified' ? "bg-emerald-50 text-emerald-600" : 
+                    item.status === 'pending' ? "bg-amber-50 text-amber-600" : 
+                    "bg-red-50 text-red-600"
+                  )}>
+                    {item.status === 'verified' ? <UserCheck size={24} /> : 
+                     item.status === 'pending' ? <Clock size={24} /> : 
+                     <UserX size={24} />}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">{item.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{item.date}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={cn(
+                    "font-bold text-sm",
+                    item.status === 'verified' ? "text-emerald-600" : 
+                    item.status === 'pending' ? "text-amber-600" : 
+                    "text-red-600"
+                  )}>
+                    {item.status === 'verified' ? `+${item.points} Points` : 
+                     item.status === 'pending' ? 'Pending' : 
+                     'Expired'}
+                  </p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {item.status === 'verified' ? 'Points Credited' : 
+                     item.status === 'pending' ? 'Points Pending' : 
+                     'Points Expired'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-start justify-between gap-4 group">
+          <div className="flex gap-4">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
+              <AlertTriangle size={20} />
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed font-medium">
+              <span className="font-bold text-slate-900">Note:</span> If invite verifies within 3 days, points will be credited. Otherwise, points expire.
+            </p>
+          </div>
+          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white rounded-xl transition-all shadow-sm md:opacity-0 group-hover:opacity-100">
+            <MoreHorizontal size={20} />
+          </button>
         </div>
       </div>
     </div>
@@ -2066,7 +3000,7 @@ const CreateAdsPage = ({ user, ads, onAdCreated }: { user: User | null, ads: Ad[
   const handleSubmit = async () => {
     const newAd: Ad = {
       ...formData,
-      id: Date.now(),
+      id: Math.floor(Date.now() + Math.random() * 1000000),
       user_id: user?.id || 0,
       status: 'active',
       created_at: new Date().toISOString()
@@ -2433,6 +3367,7 @@ export default function App() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -2454,6 +3389,20 @@ export default function App() {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('a') || target.closest('button')) {
+        const event = new CustomEvent('trigger-burst', { 
+          detail: { x: e.clientX, y: e.clientY } 
+        });
+        window.dispatchEvent(event);
+      }
+    };
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
   }, []);
 
   const handleAuthSuccess = () => {
@@ -2480,6 +3429,8 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen bg-slate-50">
+        <BurstContainer />
+        <SocialLinksModal isOpen={isSocialModalOpen} onClose={() => setIsSocialModalOpen(false)} />
         {isAuthenticated && <Header />}
         
         <main className={cn(isAuthenticated ? "max-w-7xl mx-auto" : "")}>
@@ -2502,30 +3453,19 @@ export default function App() {
                 <Route path="/create-post" element={<CreatePostPage user={user} onPostCreated={handlePostCreated} />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/ads" element={<CreateAdsPage user={user} ads={ads} onAdCreated={handleAdCreated} />} />
-                <Route path="/invite" element={
-                  <div className="pt-24 pb-20 px-4 text-center space-y-6">
-                    <div className="w-24 h-24 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto text-blue-600">
-                      <Users size={48} />
-                    </div>
-                    <h2 className="text-3xl font-display font-bold">Invite Friends</h2>
-                    <p className="text-slate-500 max-w-md mx-auto">Share your referral code and earn 100 GNG Points for every friend who joins!</p>
-                    <div className="bg-white p-6 rounded-2xl border-2 border-dashed border-slate-200 max-w-sm mx-auto">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Your Referral Code</p>
-                      <p className="text-3xl font-display font-bold text-blue-600 tracking-wider">{user?.referral_code}</p>
-                    </div>
-                    <button className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition-colors shadow-lg">
-                      Share Referral Link
-                    </button>
-                  </div>
-                } />
+                <Route path="/invite" element={<InviteFriendsPage user={user} />} />
                 <Route path="/account" element={
                   <div className="pt-24 pb-20 px-4 max-w-2xl mx-auto space-y-6">
                     <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center relative overflow-hidden">
                       <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-10" />
+                      
+
                       <div className="relative">
+                      <div className="relative inline-block">
                         <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 overflow-hidden border-4 border-white shadow-lg">
                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} alt="Profile" />
                         </div>
+                      </div>
                         <h3 className="text-2xl font-display font-bold text-slate-900">{user?.email?.split('@')[0]}</h3>
                         <p className="text-xs text-slate-500 mb-6">Member since {new Date(user?.created_at || '').toLocaleDateString()}</p>
                         
@@ -2587,6 +3527,7 @@ export default function App() {
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                       {[
                         { icon: Settings, label: 'Account Settings', path: '/settings' },
+                        { icon: Info, label: 'System Notices', path: '/notice' },
                         { icon: ShieldCheck, label: 'Security & Privacy', path: '/security' },
                         { icon: Bell, label: 'Notifications' },
                         { icon: ExternalLink, label: 'Help & Support', path: '/support' },
@@ -2612,6 +3553,7 @@ export default function App() {
                   </div>
                 } />
                 <Route path="/mlm-plan" element={<MLMPlanDashboard />} />
+                <Route path="/notice" element={<SystemNoticePage />} />
                 <Route path="/settings" element={<AccountSettingsPage />} />
                 <Route path="/security" element={<SecurityPrivacyPage />} />
                 <Route path="/support" element={<HelpSupportPage />} />
@@ -2625,6 +3567,7 @@ export default function App() {
         </main>
 
         {isAuthenticated && <BottomNav />}
+        <DraggableFloatingMenu />
       </div>
     </Router>
   );
